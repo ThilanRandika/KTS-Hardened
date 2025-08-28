@@ -10,6 +10,12 @@ const addTicket = asyncHandler(async (req, res) => {
 
   const { station, total, seatCount, roadRouteId } = req.body;
 
+  // Sanitize inputs
+  const sanitizedStation = sanitizeHtml(station);
+  const sanitizedTotal = sanitizeHtml(total);
+  const sanitizedSeatCount = sanitizeHtml(seatCount);
+  const sanitizedRoadRouteId = sanitizeHtml(roadRouteId);
+
   //get the last ticketId
   const lastTicket = await Ticket.find().sort({ ticketId: -1 }).limit(1);
 
@@ -31,11 +37,11 @@ const addTicket = asyncHandler(async (req, res) => {
     colorDark: "#000",
     qrCategory: "url",
     text: `
-    ticketId -: ${ticketId}
-    station -: ${station}
-    total -: ${total}
-    seatCount -: ${seatCount}
-    roadRouteId -: ${roadRouteId}
+      ticketId -: ${ticketId}
+      station -: ${sanitizedStation}
+      total -: ${sanitizedTotal}
+      seatCount -: ${sanitizedSeatCount}
+      roadRouteId -: ${sanitizedRoadRouteId}
     `,
   };
 
@@ -56,10 +62,10 @@ const addTicket = asyncHandler(async (req, res) => {
     ticketId,
     userId: id,
     date: Date.now(),
-    station,
-    total,
-    seatCount,
-    roadRouteId,
+    station: sanitizedStation,
+    total: sanitizedTotal,
+    seatCount: sanitizedSeatCount,
+    roadRouteId: sanitizedRoadRouteId,
     qrCode,
   });
 
@@ -68,11 +74,11 @@ const addTicket = asyncHandler(async (req, res) => {
 
     //
     const message = `
-    <h2>Hello ${name}</h2>
-    <p>You have purchase a QR code from KTS</p>
-    <p>Ticket is only valid for 2 days</p>
-     <img src=${qrCode} width="300" height="300"/>
-     <p>Regards ICI</p>
+      <h2>${sanitizeHtml(`Hello ${name}`)}</h2>
+      <p>You have purchased a QR code from ICI</p>
+      <p>Ticket is only valid for 2 days</p>
+      <img src=${sanitizeHtml(qrCode)} width="300" height="300"/>
+      <p>Regards, ICI</p>
     
     `;
 
