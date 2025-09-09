@@ -10,15 +10,16 @@ const {
 const protect = require("../middleware/authMiddleware");
 const { upload } = require("../util/fileUpload");
 const router = express.Router();
+const { createAccountLimiter } = require("../middleware/ratelimit");
 
 //create employee  -- manager
-router.post("/", protect, upload.single("image"), createEmployee);
+router.post("/", protect,createAccountLimiter, upload.single("image"), createEmployee);
 //get all employees
 router.get("/", getAllEmployees);
 //get a single employee
 router.get("/:id", getEmployeeById);
 //update employee ---manager
-router.patch("/:id", protect, upload.single("image"), updateEmployee);
+router.patch("/:id", protect, createAccountLimiter, upload.single("image"), updateEmployee);
 //change employee password  --manager
 router.patch("/changePassword/:id", protect, updateEmployeePassword);
 //delete employee  --manager
