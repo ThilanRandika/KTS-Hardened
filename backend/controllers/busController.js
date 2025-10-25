@@ -3,10 +3,23 @@ const asyncHandler = require("express-async-handler");
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const { fileSizeFormatter } = require("../util/fileUpload");
-const { createAccountLimiter } = require("../middleware/ratelimit");
+const { allow } = require("../util/rateGate");
 //create bus
 // snyk-code:ignore CWE-770 -- Route is rate-limited before file I/O (see routes/*Routes.js). Exp: 2026-01-31
-const createBusImpl = asyncHandler(async (req, res) => {
+const createBus = asyncHandler(async (req, res) => {
++  // --- Controller-level rate gate (avoid expensive work on bursts)
++  const key = req.user?.id ? `u:${req.user.id}` : `ip:${req.ip}`;
++  const decision = allow({
++    key,
++    max: Number(process.env.RATE_CREATE_MAX || 20),
++    windowMs: Number(process.env.RATE_WINDOW_MS || 15 * 60 * 1000),
++  });
++  if (!decision.allowed) {
++    res.set("RateLimit-Limit", String(process.env.RATE_CREATE_MAX || 20));
++    res.set("RateLimit-Remaining", String(decision.remaining));
++    res.set("RateLimit-Reset", Math.ceil(decision.resetAt / 1000).toString());
++    return res.status(429).json({ error: "Too many create requests. Please try again later." });
++  }
   const personType = req.personType;
 
   if (personType === "user") {
@@ -142,7 +155,7 @@ const deleteBusById = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  createBus: [createAccountLimiter, createBusImpl],
+  createBus,
   getAllBuses,
   getBusById,
   deleteBusById,
