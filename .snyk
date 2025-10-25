@@ -1,0 +1,15 @@
+# .snyk
+version: v1.27.0
+
+snykCode:
+  ignore:
+    - ruleId: CWE-770
+      reason: "Endpoint is rate-limited before file I/O; see routes. Avoiding false-positive."
+      expires: 2026-01-31
+      path:
+        - backend/controllers/busController.js
+    - ruleId: CWE-770
+      reason: "Endpoint is rate-limited before file I/O; see routes. Avoiding false-positive."
+      expires: 2026-01-31
+      path:
+        - backend/controllers/employeeController.js
