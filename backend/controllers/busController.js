@@ -3,9 +3,10 @@ const asyncHandler = require("express-async-handler");
 const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const { fileSizeFormatter } = require("../util/fileUpload");
+const { createAccountLimiter } = require("../middleware/ratelimit");
 //create bus
 // snyk-code:ignore CWE-770 -- Route is rate-limited before file I/O (see routes/*Routes.js). Exp: 2026-01-31
-const createBus = asyncHandler(async (req, res) => {
+const createBusImpl = asyncHandler(async (req, res) => {
   const personType = req.personType;
 
   if (personType === "user") {
@@ -141,7 +142,7 @@ const deleteBusById = asyncHandler(async (req, res) => {
 });
 
 module.exports = {
-  createBus,
+  createBus: [createAccountLimiter, createBusImpl],
   getAllBuses,
   getBusById,
   deleteBusById,
