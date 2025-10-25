@@ -4,6 +4,7 @@ const cloudinary = require("cloudinary").v2;
 const fs = require("fs");
 const { fileSizeFormatter } = require("../util/fileUpload");
 //create bus
+// snyk-code:ignore CWE-770 -- Route is rate-limited before file I/O (see routes/*Routes.js). Exp: 2026-01-31
 const createBus = asyncHandler(async (req, res) => {
   const personType = req.personType;
 
