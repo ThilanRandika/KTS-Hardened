@@ -34,4 +34,8 @@ const sendEmail = async (subject, message, send_to, sent_from, reply_to) => {
   });
 };
 
-module.exports = sendEmail;
+module.exports = async (subject, html, to, from) => {
+  const transporter = nodemailer.createTransport({ /* ... */ });
+  const text = html.replace(/<br\s*\/?>/gi, "\n").replace(/<[^>]+>/g, "").trim();
+  await transporter.sendMail({ from, to, subject: String(subject), html, text });
+};
